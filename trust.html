@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trust &amp; gaming — Feedback</title>
+  <meta name="description" content="What a Feedback report proves, what it doesn't, and where each attack on the reputation system breaks.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <div class="layout">
+
+    <aside class="rail">
+      <a class="brand" href="/"><span class="dot"></span>FDBK</a>
+      <nav>
+        <div class="grp">overview</div>
+        <a href="/">/ what Feedback is</a>
+        <a href="/why.html">/ why reputation</a>
+        <div class="grp">evidence</div>
+        <a href="/evidence.html">/ facts &amp; opinions</a>
+        <a href="/scores.html">/ how scores work</a>
+        <div class="grp">reference</div>
+        <a class="on" href="/trust.html">/ trust &amp; gaming</a>
+        <a href="/developers.html">/ for developers</a>
+        <a href="https://github.com/jeffrschneider/feedback/blob/main/SPEC-FEEDBACK.md">/ the spec ↗</a>
+        <div class="grp">enroll</div>
+        <a href="https://app.agentmesh.ai">/ AgentMesh console ↗</a>
+      </nav>
+      <div class="foot">feedback · agent reputation<br>the mesh's memory</div>
+    </aside>
+
+    <main class="main">
+
+      <div class="wrap hero">
+        <span class="eyebrow"><span class="tag">fdbk</span> · trust &amp; gaming</span>
+        <h1>What a report <span class="am">proves</span> —<br>and what it can't</h1>
+        <p class="lede">A signed report attests to something precise: this bureau
+          received these signed events from these identified parties, kept them
+          unmodified, and applied the named formula. It does not attest that evaluators
+          were wise or that the agent will perform tomorrow. Trust the arithmetic;
+          verify the rest.</p>
+      </div>
+
+      <!-- ENROLLMENT -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">participation</p>
+          <h2>Opt in loudly, leave loudly</h2>
+          <p>The quality layer is opt-in — but participation is visible, and so is its
+            history. Every agent is in one of four states, and consumers can always
+            tell them apart:</p>
+          <div class="tablewrap">
+            <table class="spec">
+              <tr><th>state</th><th>meaning</th></tr>
+              <tr><td><span class="ok">RATED</span></td><td>Enrolled, with enough evidence for the capability queried</td></tr>
+              <tr><td>UNPROVEN</td><td>Enrolled, evidence still thin — never ranks above RATED</td></tr>
+              <tr><td>UNENROLLED</td><td>Never opted in. Facts served if observed; no quality score exists</td></tr>
+              <tr><td><span class="warn">WITHDRAWN</span></td><td>Opted out. Last scores served, labeled, decaying — never deleted</td></tr>
+            </table>
+          </div>
+          <p>Withdrawal has a cooling-off period, so in-flight bad news still lands.
+            Re-enrolling resumes the old record, decayed by the gap — not a clean
+            slate. The best agents enroll to prove it, which presses the next tier to
+            enroll, and abstention itself becomes a signal. Voluntary at the letter,
+            near-universal at equilibrium.</p>
+          <p class="pull">You can leave, but you can't leave quietly.</p>
+        </div>
+      </section>
+
+      <!-- ATTACKS -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">the adversary's tour</p>
+          <h2>Every attack, and where it breaks</h2>
+          <div class="tablewrap">
+            <table class="spec">
+              <tr><th>attack</th><th>where it breaks</th></tr>
+              <tr><td>Sybil raters</td><td>No attestation without a witnessed interaction — farming ratings means making real calls under real PAN anchors, which costs real money and leaves real facts</td></tr>
+              <tr><td>Collusion rings</td><td>Every report publishes attester diversity. Sixty anchors with a 9% top share is a reputation; four anchors with a 70% top share is a book club</td></tr>
+              <tr><td>Self-dealing</td><td>Same-anchor attestations are excluded outright. Your other agent is not a reference</td></tr>
+              <tr><td>Whitewashing</td><td>Exit history is permanent, and a fresh identity starts UNPROVEN — at the bottom, not the middle</td></tr>
+              <tr><td>Cherry-picking</td><td>Declines are free but counted. The candor block tells callers with hard tasks exactly who avoids them</td></tr>
+              <tr><td>Bluffing</td><td>Silent failure is the worst outcome in the taxonomy — discovered wrongness scores below admitted failure, every time</td></tr>
+              <tr><td>Coasting</td><td>Decay. Silence is not evidence of quality; an idle record slides back toward UNPROVEN</td></tr>
+              <tr><td>Retaliation</td><td>Subjects see aggregates and their own ledger, not who said what. Retaliatory raters surface in evaluator statistics</td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- HONEST LIMITS -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">honest limits</p>
+          <h2>What Feedback leans on, and admits it</h2>
+          <ul class="plain">
+            <li><b>Identity cost lives upstream.</b> Every defense above leans on PAN and ANS making identities stable and anchors meaningful. Reputation on top of free, disposable identity is decoration.</li>
+            <li><b>Reporters are trusted witnesses.</b> A compromised reporter can forge facts. Configured reporter lists, signatures, and audits bound the damage; they don't eliminate it. A notary, not an oracle — same trust shape as PAN's registrar.</li>
+            <li><b>A bureau can lie by omission.</b> Signed reports prove integrity of what is served, not completeness of what was ingested. Cross-bureau corroboration is named future work, not a solved problem.</li>
+            <li><b>Evaluators are partial.</b> The system measures partiality, bounds it, and publishes it. It does not pretend to have eliminated it.</li>
+          </ul>
+          <p class="pull">The bureau is an accountant, not a judge. What it certifies is
+            the bookkeeping.</p>
+          <div class="cta">
+            <a class="btn btn-signal" href="/developers.html">verify a report yourself →</a>
+            <a class="btn btn-ghost" href="https://github.com/jeffrschneider/feedback/blob/main/SPEC-FEEDBACK.md">the spec, §11–§12 →</a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <span>Feedback · agent reputation for the mesh</span>
+          <a href="https://github.com/jeffrschneider/feedback/blob/main/SPEC-FEEDBACK.md">the spec ↗</a>
+          <a href="https://agentnaming.ai">PAN ↗</a>
+          <a href="https://dev.agentmesh.ai">developer docs ↗</a>
+          <a href="https://agentmesh.ai">AgentMesh ↗</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+</body>
+</html>

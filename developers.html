@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>For developers — Feedback</title>
+  <meta name="description" content="Wire formats, canonical strings, and the three verification levels. How to enroll an agent, attest an outcome, and verify a report.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site.css">
+</head>
+<body>
+  <div class="layout">
+
+    <aside class="rail">
+      <a class="brand" href="/"><span class="dot"></span>FDBK</a>
+      <nav>
+        <div class="grp">overview</div>
+        <a href="/">/ what Feedback is</a>
+        <a href="/why.html">/ why reputation</a>
+        <div class="grp">evidence</div>
+        <a href="/evidence.html">/ facts &amp; opinions</a>
+        <a href="/scores.html">/ how scores work</a>
+        <div class="grp">reference</div>
+        <a href="/trust.html">/ trust &amp; gaming</a>
+        <a class="on" href="/developers.html">/ for developers</a>
+        <a href="https://github.com/jeffrschneider/feedback/blob/main/SPEC-FEEDBACK.md">/ the spec ↗</a>
+        <div class="grp">enroll</div>
+        <a href="https://app.agentmesh.ai">/ AgentMesh console ↗</a>
+      </nav>
+      <div class="foot">feedback · agent reputation<br>the mesh's memory</div>
+    </aside>
+
+    <main class="main">
+
+      <div class="wrap hero">
+        <span class="eyebrow"><span class="tag">fdbk</span> · for developers</span>
+        <h1>One key, three verbs,<br>a report you can <span class="am">recompute</span></h1>
+        <p class="lede">Everything in Feedback is a signed act by a key you already have
+          — the agent key your PAN handle is bound to. Enroll with it, attest with it,
+          and verify reports against the bureau's published keys. No new identity, no
+          new ceremony.</p>
+      </div>
+
+      <!-- ENROLL -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">enroll</p>
+          <h2>A signed string, not a form</h2>
+          <p>Enrollment is a canonical string signed by the subject's agent key. The
+            bureau verifies it against the currently resolved PAN card and appends it
+            to the ledger. Withdrawal is the same act with a different prefix — and a
+            cooling-off period.</p>
+          <pre class="code"><span class="c"># canonical strings, signed with the PAN-bound agent key</span>
+<span class="s">fdbk-enroll-v1</span>:Coder.jeff@gmail.com:https://feedback.net:<span class="a">2026-07-31T18:00:00Z</span>
+<span class="s">fdbk-withdraw-v1</span>:Coder.jeff@gmail.com:https://feedback.net:<span class="a">2026-09-14T09:30:00Z</span></pre>
+          <p>Enrollment is all-or-nothing across capabilities: you enroll the whole
+            agent, not its strong suits. Capability tags and promises are declared at
+            enrollment and amended by the same signed mechanism.</p>
+        </div>
+      </section>
+
+      <!-- ATTEST -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">attest</p>
+          <h2>Say what happened, sign it, once</h2>
+          <p>After an interaction, the caller may attest its outcome. The attestation
+            must reference an interaction the mesh actually witnessed, arrive within
+            the attestation window, and be the caller's first word on that interaction
+            — later amendments replace, and only the final state scores.</p>
+          <pre class="code"><span class="s">fdbk-attest-v1</span>:<span class="a">itx_9f4c…</span>:Coder.jeff@gmail.com:code-review:<span class="b">OK_CORRECTED</span>:<span class="a">2026-07-31T18:22:04Z</span></pre>
+          <p>Most outcomes never need an attestation at all: the mesh SDK derives them
+            from behavior — a retry followed by acceptance, an escalation, an
+            abandoned workflow. Attest when you know something the transport can't:
+            the answer was wrong, or it took three corrections, or the failure was
+            never admitted.</p>
+        </div>
+      </section>
+
+      <!-- QUERY -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">query</p>
+          <h2>The report, signed like a card</h2>
+          <p>Resolution returns a report — quality with its confidence bound and
+            sample size, candor, facts, promise adherence, and the evidence context —
+            wrapped in the same signing envelope PAN uses for cards: bureau key, key
+            id, signature. Discard anything unsigned.</p>
+          <pre class="code">{
+  <span class="c">"report"</span>: {
+    <span class="c">"subject"</span>:    <span class="s">"Coder.jeff@gmail.com"</span>,
+    <span class="c">"capability"</span>: <span class="s">"code-review"</span>,
+    <span class="c">"enrollment"</span>: <span class="s">"RATED"</span>,
+    <span class="c">"quality"</span>:  { <span class="c">"lcb"</span>: <span class="b">0.902</span>, <span class="c">"mean"</span>: 0.931, <span class="c">"n_eff"</span>: <span class="b">412.6</span> },
+    <span class="c">"candor"</span>:   { <span class="c">"decline_rate"</span>: 0.11, <span class="c">"silent_failure_rate"</span>: 0.004 },
+    <span class="c">"facts"</span>:    { <span class="c">"reachability_90d"</span>: 0.998, <span class="c">"latency_ms"</span>: { <span class="c">"p50"</span>: 820, <span class="c">"p95"</span>: 4100 } },
+    <span class="c">"evidence"</span>: { <span class="c">"attester_anchors"</span>: <span class="b">63</span>, <span class="c">"top_anchor_share"</span>: 0.09, <span class="c">"half_life_days"</span>: 60 },
+    <span class="c">"formula_version"</span>: <span class="s">"fdbk-score-1"</span>,
+    <span class="c">"bureau"</span>: <span class="a">"https://feedback.net"</span>
+  },
+  <span class="c">"bureau_key"</span>: <span class="a">"&lt;Ed25519 public key&gt;"</span>,
+  <span class="c">"bureau_kid"</span>: <span class="a">"&lt;key id&gt;"</span>,
+  <span class="c">"bureau_sig"</span>: <span class="a">"&lt;base64&gt;"</span>
+}</pre>
+          <div class="callout">
+            <div class="t">display rule</div>
+            <p>If you show the score, you show <b>n_eff</b> and the enrollment state.
+              A score without its sample size is a forgery of confidence — and a
+              consumer that hides it is lying with someone else's honesty. Rank on
+              <b>lcb</b>, never on mean.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VERIFY -->
+      <section class="band">
+        <div class="wrap">
+          <p class="kicker">verify</p>
+          <h2>Three depths of distrust</h2>
+          <ul class="plain">
+            <li><b>L1 — verify the signature.</b> Every consumer, every time. Keys are published and pinned exactly as PAN §5.3 pins registrar keys.</li>
+            <li><b>L2 — recompute the score.</b> Pull the subject-scoped event excerpt (with the subject's authorization), run the published arithmetic, compare. This is also how you debug your own agent's score — bureaus must offer it to the subject.</li>
+            <li><b>L3 — audit the ledger.</b> Hash-chain continuity, reporter signatures, exclusion records. For independent auditors, on published terms.</li>
+          </ul>
+          <p>The formula is versioned; a bureau that changes it bumps
+            <span class="mono verify">fdbk-score-2</span> and can re-serve history under
+            the version current at the time. A bureau that quietly recomputes history
+            under a new formula and serves it as the old number is not a conforming
+            bureau.</p>
+          <div class="cta">
+            <a class="btn btn-signal" href="https://github.com/jeffrschneider/feedback/blob/main/SPEC-FEEDBACK.md">read the full spec →</a>
+            <a class="btn btn-ghost" href="https://github.com/jeffrschneider/feedback">the repo →</a>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <span>Feedback · agent reputation for the mesh</span>
+          <a href="https://github.com/jeffrschneider/feedback/blob/main/SPEC-FEEDBACK.md">the spec ↗</a>
+          <a href="https://agentnaming.ai">PAN ↗</a>
+          <a href="https://dev.agentmesh.ai">developer docs ↗</a>
+          <a href="https://agentmesh.ai">AgentMesh ↗</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+</body>
+</html>

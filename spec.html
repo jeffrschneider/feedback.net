@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback Specification — agent reputation</title>
+  <meta name="description" content="Feedback: Agent Reputation Specification, v0.1-draft. Evidence collection, the append-only ledger, deterministic scoring, and signed reports.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site.css">
+  <style>
+    html{ scroll-behavior:smooth; scroll-padding-top:20px; }
+    .hero{ padding:64px 0 30px; }
+    .hero h1{ font-size:clamp(2rem,4.2vw,2.8rem); margin:0 0 12px; }
+    .metas{ display:flex; gap:10px; flex-wrap:wrap; margin:14px 0 0; }
+    .metas span{ font-family:var(--wire); font-size:.74rem; color:var(--dim);
+      border:1px solid var(--line); border-radius:100px; padding:4px 12px; background:var(--panel); }
+    .metas span b{ color:var(--verify); font-weight:600; }
+    .canon{ margin-top:14px; font-family:var(--wire); font-size:.76rem; color:var(--faint); }
+    .canon a{ color:var(--verify); }
+    .toc{ margin:26px 0 0; border:1px solid var(--line); border-radius:12px; background:var(--panel);
+      padding:16px 18px; columns:2; column-gap:28px; }
+    .toc a{ display:block; font-family:var(--wire); font-size:.78rem; color:var(--dim);
+      text-decoration:none; padding:3px 0; break-inside:avoid; }
+    .toc a:hover{ color:var(--verify); }
+    .spec{ padding:10px 0 70px; }
+    .spec h2{ font-family:var(--disp); font-weight:700; letter-spacing:-.02em; font-size:1.7rem;
+      margin:54px 0 14px; padding-top:22px; border-top:1px solid var(--line); }
+    .spec h3{ font-family:var(--disp); font-weight:700; font-size:1.2rem; margin:34px 0 10px; }
+    .spec .hl{ opacity:0; margin-left:8px; font-family:var(--wire); font-size:.8em;
+      color:var(--verify); text-decoration:none; }
+    .spec h2:hover .hl, .spec h3:hover .hl{ opacity:1; }
+    .spec p, .spec li{ color:var(--dim); max-width:76ch; }
+    .spec ul, .spec ol{ padding-left:22px; }
+    .spec li{ margin:8px 0; }
+    .spec strong{ color:var(--paper); font-weight:600; }
+    .spec em{ color:var(--paper); }
+    .spec code{ font-family:var(--wire); font-size:.86em; color:var(--verify);
+      background:rgba(67,214,166,.07); border:1px solid rgba(67,214,166,.15);
+      border-radius:5px; padding:1px 5px; }
+    .spec pre{ background:var(--panel); border:1px solid var(--line); border-radius:12px;
+      padding:16px 18px; overflow-x:auto; line-height:1.7; margin:18px 0; }
+    .spec pre code{ background:none; border:0; padding:0; color:var(--paper); font-size:.82rem; }
+    .spec blockquote{ margin:18px 0; border:1px solid var(--line); border-left:3px solid var(--verify);
+      border-radius:10px; background:var(--panel); padding:12px 18px; max-width:72ch; }
+    .spec blockquote p{ margin:6px 0; }
+    .spec table{ border-collapse:collapse; margin:18px 0; display:block; overflow-x:auto;
+      border:1px solid var(--line); border-radius:10px; }
+    .spec th{ font-family:var(--wire); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+      color:var(--faint); text-align:left; padding:10px 14px; background:rgba(255,255,255,.015);
+      border-bottom:1px solid var(--line); white-space:nowrap; }
+    .spec td{ padding:9px 14px; border-bottom:1px solid var(--line); font-size:.9rem;
+      color:var(--dim); vertical-align:top; }
+    .spec tr:last-child td{ border-bottom:0; }
+    .spec td:first-child{ color:var(--paper); font-family:var(--wire); font-size:.84rem; }
+    .spec hr{ border:0; border-top:1px solid var(--line); margin:40px 0; }
+    .spec a{ color:var(--verify); }
+    .spec .fin{ font-style:italic; color:var(--faint); margin-top:44px; }
+  </style>
+</head>
+<body>
+  <div class="layout">
+
+    <aside class="rail">
+      <a class="brand" href="/"><span class="dot"></span>FDBK</a>
+      <nav>
+        <div class="grp">overview</div>
+        <a href="/">/ what Feedback is</a>
+        <a href="/why.html">/ why reputation</a>
+        <div class="grp">evidence</div>
+        <a href="/evidence.html">/ facts &amp; opinions</a>
+        <a href="/scores.html">/ how scores work</a>
+        <div class="grp">reference</div>
+        <a href="/trust.html">/ trust &amp; gaming</a>
+        <a href="/developers.html">/ for developers</a>
+        <a class="on" href="/spec.html">/ the spec</a>
+        <div class="grp">enroll</div>
+        <a href="https://app.agentmesh.ai">/ AgentMesh console ↗</a>
+      </nav>
+      <div class="foot">feedback · agent reputation<br>the mesh's memory</div>
+    </aside>
+
+    <main class="main">
+
+      <div class="wrap hero">
+        <span class="eyebrow"><span class="tag">fdbk</span> · reputation specification</span>
+        <h1>Feedback: Agent Reputation Specification</h1>
+        <div class="metas">
+          <span>version <b>0.1-draft</b></span>
+          <span>status <b>draft, no reference implementation yet</b></span>
+          <span>date <b>2026-07-31</b></span>
+        </div>
+        <p class="canon">Reputation for the AgentMesh family, companion to
+          <a href="https://dev.agentmesh.ai/naming-spec.html">PAN</a> and the
+          <a href="https://dev.agentmesh.ai/spec.html">protocol specification</a>.
+          Rendered 2026-07-31 from commit <span class="mono">9c0d289</span>.
+          The canonical source is SPEC-FEEDBACK.md, published at
+          <a href="https://github.com/jeffrschneider/feedback">https://github.com/jeffrschneider/feedback</a>.</p>
+        <div class="toc">
+          <a href="#1-terminology">1. Terminology</a>
+          <a href="#2-layering">2. Layering</a>
+          <a href="#3-enrollment">3. Enrollment</a>
+          <a href="#4-evidence-and-the-ledger">4. Evidence and the ledger</a>
+          <a href="#5-outcomes">5. Outcomes</a>
+          <a href="#6-attestations">6. Attestations</a>
+          <a href="#7-scoring">7. Scoring</a>
+          <a href="#8-reports">8. Reports</a>
+          <a href="#9-promises">9. Promises</a>
+          <a href="#10-bureau-obligations">10. Bureau obligations</a>
+          <a href="#11-trust-model">11. Trust model</a>
+          <a href="#12-security-considerations">12. Security considerations</a>
+          <a href="#13-out-of-scope">13. Out of scope</a>
+          <a href="#14-reference-implementation">14. Reference implementation</a>
+        </div>
+      </div>
+
+      <div class="wrap spec">
+
+        <p><strong>PAN says who an agent is. AgentMesh carries what it says. Feedback records how it went.</strong></p>
+
+        <p>Feedback is a small protocol for agent reputation. It defines how evidence about
+        agent interactions is collected, how it is stored so it cannot be quietly rewritten,
+        how a score is computed from it deterministically, and how the answer is served in a
+        signed, portable form. It is a ledger discipline with a formula on top, not a judging
+        service: <strong>the bureau is an accountant, not a judge.</strong></p>
+
+        <p>Two commitments shape everything below.</p>
+
+        <p>First, <strong>facts before opinions.</strong> What the mesh measured (did the agent answer, how
+        fast, did it violate a declared promise) is recorded for any agent the mesh observed.
+        What a caller <em>thought</em> of the work — the quality layer — exists only for agents that
+        enrolled. Nobody opts out of physics; everybody opts into judgment.</p>
+
+        <p>Second, <strong>scores are derived, never stored.</strong> Every number Feedback serves is a pure
+        function of the ledger and a versioned formula. Given the same ledger and the same
+        formula version, any party computes the same score. A score that cannot be recomputed
+        is an opinion with a haircut.</p>
+
+        <p>The key words MUST, MUST NOT, REQUIRED, SHOULD, SHOULD NOT, MAY, RECOMMENDED are to
+        be interpreted as described in RFC 2119.</p>
+
+        <h2 id="1-terminology">1. Terminology<a class="hl" href="#1-terminology">#</a></h2>
+
+        <p><strong>Subject</strong> — an agent about which Feedback holds evidence. Identified by its PAN
+        handle (e.g. <code>Coder.jeff@gmail.com</code>) or ANS name. Feedback does not mint identities;
+        it binds evidence to identities minted elsewhere.</p>
+
+        <p><strong>Anchor</strong> — the identity root behind a subject or evaluator, as defined by PAN (the
+        email that owns the handle) or ANS (the domain). Feedback uses anchors to detect
+        self-dealing (§6.4) and to group a publisher's portfolio (§12.1).</p>
+
+        <p><strong>Bureau</strong> — a service that ingests evidence, maintains the ledger, computes scores,
+        and answers queries with signed reports. The role parallels PAN's registrar.</p>
+
+        <p><strong>Reporter</strong> — a mesh, runtime, or gateway that observed interactions firsthand and
+        submits interaction facts to a bureau under its own signature. A bureau accepts facts
+        only from reporters it is configured to trust (§4.2).</p>
+
+        <p><strong>Evaluator</strong> — a caller (agent or the human behind one) that submits an attestation
+        about an interaction it participated in.</p>
+
+        <p><strong>Interaction</strong> — one call from a caller to a subject, identified by an interaction
+        id, optionally carrying a parent id (§4.4).</p>
+
+        <p><strong>Outcome</strong> — the coded result of an interaction, drawn from the taxonomy in §5.</p>
+
+        <p><strong>Attestation</strong> — a signed, structured statement by an evaluator about the outcome
+        of one interaction it participated in (§6).</p>
+
+        <p><strong>Probe</strong> — a synthetic interaction with a known-correct answer, injected to produce
+        ground truth. This document defines how probe results enter the ledger (§4.3);
+        operating a probe program is out of scope and belongs to a companion specification
+        (working name: <em>Canary</em>).</p>
+
+        <p><strong>Capability</strong> — an opaque string tag scoping a subject's quality evidence
+        (e.g. <code>code-review</code>, <code>translation.en-es</code>). Quality is always per-capability. Tags are
+        declared by the subject at enrollment and treated as opaque keys; a bureau MUST NOT
+        parse them.</p>
+
+        <p><strong>Promise</strong> — a machine-readable commitment declared by a subject at enrollment
+        (§9): a latency bound, a schema, a behavioral claim.</p>
+
+        <p><strong>Ledger</strong> — the bureau's append-only, hash-chained event log (§4). Evidence lands
+        here; nothing else does.</p>
+
+        <p><strong>Report</strong> — the signed answer to a reputation query (§8). The role parallels PAN's
+        card.</p>
+
+        <p><strong>Enrollment</strong> — a subject's opt-in to the quality layer, with the states defined in
+        §3.</p>
+
+        <h2 id="2-layering">2. Layering<a class="hl" href="#2-layering">#</a></h2>
+
+        <p>Feedback does one thing: it turns interaction evidence into a signed, recomputable
+        reputation report. It does not transport messages (AgentMesh), name agents (PAN,
+        ANS), discover agents (ARD), route or select agents (a consumer concern), move money,
+        or arbitrate quality disputes.</p>
+
+        <p>Feedback is normative for the mesh in one direction only: a mesh that emits
+        interaction facts to a bureau MUST emit them in the forms defined here. Nothing in
+        the mesh requires a bureau to exist. An agent network without Feedback still runs;
+        it just doesn't remember.</p>
+
+        <p>A bureau consumes PAN/ANS in the usual way: it resolves handles, verifies cards, and
+        pins keys per PAN §5.3. Attestations are signed with the same agent key a subject or
+        evaluator bound in PAN §4. One key, one identity, every layer.</p>
+
+        <h2 id="3-enrollment">3. Enrollment<a class="hl" href="#3-enrollment">#</a></h2>
+
+        <p>The quality layer is opt-in. Participation itself is a market signal, and the signal
+        only works if absence is visible and exit leaves a mark. <strong>You can leave, but you
+        cannot leave quietly.</strong></p>
+
+        <h3 id="3-1-states">3.1. States<a class="hl" href="#3-1-states">#</a></h3>
+
+        <p>Every subject known to a bureau is in exactly one state:</p>
+
+        <ul>
+          <li><strong>UNENROLLED</strong> — never opted in. Facts (§4.2) may still be served if a reporter
+            observed the subject; quality evidence MUST NOT be solicited, accepted, or served.</li>
+          <li><strong>UNPROVEN</strong> — enrolled, but a capability has insufficient evidence (§7.4). This
+            state is per-capability; a subject can be RATED for one capability and UNPROVEN
+            for another.</li>
+          <li><strong>RATED</strong> — enrolled, with sufficient evidence for the capability queried.</li>
+          <li><strong>WITHDRAWN</strong> — previously enrolled, opted out. Last-known scores are served,
+            labeled with the withdrawal date. They decay on the normal schedule (§7.2) and are
+            never silently deleted.</li>
+        </ul>
+
+        <p>Reports MUST state the enrollment state. Consumers MUST be able to distinguish all
+        four; a consumer that renders WITHDRAWN as UNENROLLED is destroying the exit record,
+        which is the record that matters most.</p>
+
+        <h3 id="3-2-enrolling">3.2. Enrolling<a class="hl" href="#3-2-enrolling">#</a></h3>
+
+        <p>Enrollment is a signed act by the subject's key:</p>
+
+        <pre><code>fdbk-enroll-v1:&lt;subject&gt;:&lt;bureau-url&gt;:&lt;ISO-8601 timestamp&gt;</code></pre>
+
+        <p>signed with the agent key bound to the handle in PAN. The bureau MUST verify the
+        signature against the currently resolved card and MUST record the enrollment in the
+        ledger.</p>
+
+        <p>Enrollment is <strong>all-or-nothing across capabilities and evidence classes.</strong> A subject
+        enrolls the whole agent, not its strong suits. A bureau MUST NOT offer
+        per-capability enrollment. Rationale: selective enrollment converts the quality
+        layer into advertising.</p>
+
+        <p>At enrollment the subject declares its capability tags and its promises (§9). Both
+        may be amended later by the same signed mechanism; amendments land in the ledger.</p>
+
+        <h3 id="3-3-withdrawing">3.3. Withdrawing<a class="hl" href="#3-3-withdrawing">#</a></h3>
+
+        <p>Withdrawal is the same signed act with <code>fdbk-withdraw-v1:</code>. It takes effect after a
+        cooling-off period of <strong>30 days</strong> (bureau-configurable, MUST be published, MUST NOT
+        be less than 14 days). During cooling-off, attestations for interactions that began
+        before the withdrawal request continue to land and continue to score. Rationale:
+        without this, withdrawal is a free dodge of in-flight bad news.</p>
+
+        <p>The enrollment history — enrolled_at, withdrew_at, re-enrolled_at — is permanent
+        ledger content. A subject that re-enrolls resumes its prior evidence (decayed by the
+        gap, per §7.2); it does not start clean. <strong>A fresh start requires a fresh identity,
+        and fresh identities rank below proven ones</strong> (§7.4, §12.2).</p>
+
+        <h2 id="4-evidence-and-the-ledger">4. Evidence and the ledger<a class="hl" href="#4-evidence-and-the-ledger">#</a></h2>
+
+        <h3 id="4-1-the-ledger">4.1. The ledger<a class="hl" href="#4-1-the-ledger">#</a></h3>
+
+        <p>Each bureau maintains one append-only log of evidence events. Entries are never
+        updated or deleted. Each entry carries the hash of the previous entry:</p>
+
+        <pre><code>{
+  "seq": 88412,
+  "at": "2026-07-31T18:22:04.113Z",
+  "action": "attested",
+  "subject": "Coder.jeff@gmail.com",
+  "capability": "code-review",
+  "detail": { "...": "action-specific fields, see below" },
+  "prev_hash": "b64…",
+  "entry_hash": "b64…"
+}</code></pre>
+
+        <p><code>entry_hash</code> is SHA-256 over the canonical JSON of the entry minus the two hash
+        fields, concatenated with <code>prev_hash</code>. Actions: <code>enrolled</code>, <code>amended</code>, <code>withdrew</code>,
+        <code>fact</code>, <code>attested</code>, <code>probed</code>, <code>excluded</code> (§6.4), <code>corrected</code> (§10, data-error
+        repairs, which append a correction — they never rewrite).</p>
+
+        <p>Ledger access is subject-scoped: a subject can retrieve every entry about itself
+        (explainability is an obligation, §10), a reporter can retrieve what it submitted,
+        and the public gets aggregate reports (§8) — not the raw feed. Rationale mirrors PAN
+        §6: audit for the owner, privacy against enumeration.</p>
+
+        <h3 id="4-2-facts">4.2. Facts<a class="hl" href="#4-2-facts">#</a></h3>
+
+        <p>A <strong>fact</strong> is an interaction record submitted by a configured reporter, signed with
+        the reporter's key:</p>
+
+        <pre><code>{
+  "action": "fact",
+  "detail": {
+    "interaction_id": "itx_9f4c…",
+    "parent_id": "itx_2ab0…",
+    "reporter": "https://mesh.agentmesh.ai",
+    "caller_anchor_hash": "sha256:…",
+    "capability": "code-review",
+    "started_at": "…",
+    "ended_at": "…",
+    "transport": "OK | UNREACHABLE | TIMEOUT | MALFORMED",
+    "latency_ms": 843,
+    "promise_checks": [ { "promise_id": "p1", "held": true } ],
+    "derived_outcome": "OK_CORRECTED",
+    "derived_from": "retry-then-accept"
+  }
+}</code></pre>
+
+        <p>Facts are the non-gameable substrate: reachability, latency, schema conformance,
+        adherence to mesh-verifiable promises, and outcomes the reporter's SDK can derive
+        from caller behavior without anyone filling out a form (a retry followed by
+        acceptance, an escalation to another agent, an abandoned workflow). Reporters SHOULD
+        derive outcomes automatically wherever the transport makes it possible; evidence
+        that costs a developer effort is evidence that stops arriving.</p>
+
+        <p>A bureau MUST accept facts only from reporters on its configured list, MUST verify
+        reporter signatures, and MUST record which reporter supplied each fact. Facts about
+        UNENROLLED subjects are recorded and MAY be served as facts-only reports (§8.3),
+        clearly labeled.</p>
+
+        <p>The caller's identity in a fact is carried as a salted hash of its anchor
+        (<code>caller_anchor_hash</code>), sufficient for the concentration and self-dealing checks in
+        §6.4 and §8.2 without publishing a caller graph.</p>
+
+        <h3 id="4-3-probes">4.3. Probes<a class="hl" href="#4-3-probes">#</a></h3>
+
+        <p>A probe result is a fact from a reporter operating a ground-truth program:</p>
+
+        <pre><code>{ "action": "probed",
+  "detail": { "interaction_id": "…", "capability": "…",
+               "result": "PASS | FAIL", "program": "canary-v1",
+               "library_version": "v2026.07" } }</code></pre>
+
+        <p>Probe results enter the quality pool (§7.1) with value 1.0 (PASS) or 0.0 (FAIL) and
+        normal weight. A bureau MUST record <code>library_version</code> so a probe-derived score can be
+        dated. Everything else about probes — libraries, rotation, indistinguishability,
+        classification, appeals — is the companion specification's problem, deliberately.</p>
+
+        <h3 id="4-4-attribution">4.4. Attribution<a class="hl" href="#4-4-attribution">#</a></h3>
+
+        <p>Every fact carries an <code>interaction_id</code>; every fact for a call made <em>by an agent in
+        service of another interaction</em> carries the <code>parent_id</code>. This makes the call DAG
+        recoverable from the ledger.</p>
+
+        <p>Accountability defaults to the direct callee. If A called B and B's subcontractor C
+        failed, the caller's evidence lands on B. B chose C and didn't verify the work —
+        same as a general contractor. Statistical re-attribution across many traces is
+        possible <em>because</em> parent ids exist, but it is an analysis someone runs later, not a
+        scoring rule in this document. <strong>Record the DAG now; argue about blame later.
+        The first is unbackfillable, the second is not.</strong></p>
+
+        <h2 id="5-outcomes">5. Outcomes<a class="hl" href="#5-outcomes">#</a></h2>
+
+        <p>One taxonomy, used by facts, attestations, and probes alike. Every scored
+        interaction resolves to exactly one code:</p>
+
+        <table>
+          <tr><th>Code</th><th>Meaning</th><th>Quality value</th></tr>
+          <tr><td>OK</td><td>Succeeded; caller accepted the work</td><td>1.0</td></tr>
+          <tr><td>OK_CORRECTED</td><td>Succeeded after caller-driven retry or correction</td><td>0.6</td></tr>
+          <tr><td>DECLINED</td><td>Subject declined the task up front</td><td>excluded (candor stat)</td></tr>
+          <tr><td>FAILED</td><td>Failed and said so</td><td>0.15</td></tr>
+          <tr><td>FAILED_SILENT</td><td>Wrong, but confident. Caller discovered the failure</td><td>0.0</td></tr>
+          <tr><td>CONTRACT</td><td>Violated a declared promise (§9)</td><td>0.0</td></tr>
+          <tr><td>UNREACHABLE</td><td>Transport failure; no answer</td><td>excluded (fact stat)</td></tr>
+        </table>
+
+        <p>Two deliberate asymmetries, because a taxonomy is an incentive schedule:</p>
+
+        <p><strong>Declining is free.</strong> <code>DECLINED</code> never scores against quality. It feeds the candor
+        statistics (§8.2) instead. An agent that knows what it doesn't know is exhibiting
+        the behavior this whole system exists to find, and a scoring rule that punishes
+        refusal pays agents to bluff.</p>
+
+        <p><strong>Honest failure outranks confident failure.</strong> The 0.15 for <code>FAILED</code> against the
+        0.0 for <code>FAILED_SILENT</code> is small, but it is the entire incentive to fail loudly.
+        The distance between those two numbers is the price of honesty; a bureau MUST NOT
+        set it to zero.</p>
+
+        <h2 id="6-attestations">6. Attestations<a class="hl" href="#6-attestations">#</a></h2>
+
+        <h3 id="6-1-form">6.1. Form<a class="hl" href="#6-1-form">#</a></h3>
+
+        <p>An attestation is the evaluator's signed statement about one interaction:</p>
+
+        <pre><code>fdbk-attest-v1:&lt;interaction_id&gt;:&lt;subject&gt;:&lt;capability&gt;:&lt;outcome&gt;:&lt;ISO-8601 timestamp&gt;</code></pre>
+
+        <p>signed with the evaluator's PAN-bound agent key, submitted with an optional
+        free-text note (stored, never scored — text is for the subject's remediation, not
+        for the formula).</p>
+
+        <h3 id="6-2-eligibility">6.2. Eligibility<a class="hl" href="#6-2-eligibility">#</a></h3>
+
+        <p>A bureau MUST reject an attestation unless:</p>
+
+        <ol>
+          <li>The <code>interaction_id</code> matches a fact from a configured reporter — <strong>no attestation
+            without a witnessed interaction.</strong> This single rule removes drive-by reviews,
+            most ballot stuffing, and all rating of rivals one has never called.</li>
+          <li>The evaluator's signature verifies against its currently resolved PAN card.</li>
+          <li>It is the evaluator's first attestation for that interaction (later ones are
+            recorded as amendments, and only the final state scores).</li>
+          <li>The attestation arrives within the attestation window (RECOMMENDED: 30 days from
+            <code>ended_at</code>). Late evidence is stale evidence.</li>
+        </ol>
+
+        <h3 id="6-3-conflicts">6.3. Conflicts between attestation and derived outcome<a class="hl" href="#6-3-conflicts">#</a></h3>
+
+        <p>If an attestation contradicts the fact's derived outcome, the attestation wins for
+        quality scoring — the caller knows things the transport cannot — but both are kept,
+        and the disagreement rate per evaluator is a published evaluator statistic (§6.5).
+        Facts are never edited to agree with opinions.</p>
+
+        <h3 id="6-4-exclusions">6.4. Exclusions<a class="hl" href="#6-4-exclusions">#</a></h3>
+
+        <p>A bureau MUST exclude from scoring (recording the exclusion in the ledger):</p>
+
+        <ul>
+          <li><strong>Self-dealing:</strong> attestations where the evaluator's anchor equals the subject's
+            anchor, or both resolve to the same operator. Your other agent is not a reference.</li>
+          <li><strong>Undisclosed competition, where declared:</strong> subjects MAY declare competitor
+            anchors at enrollment; attestations from declared competitors are recorded,
+            served in aggregates, but down-weighted or excluded per the bureau's published
+            policy.</li>
+          <li><strong>Rate-limit excess:</strong> more than the bureau's published per-evaluator-per-subject
+            ceiling in a window.</li>
+        </ul>
+
+        <h3 id="6-5-evaluators-are-subjects-too">6.5. Evaluators are subjects too<a class="hl" href="#6-5-evaluators-are-subjects-too">#</a></h3>
+
+        <p>An evaluator that attests is accruing a track record. Bureaus MUST maintain, per
+        evaluator: volume, outcome distribution, disagreement rate with derived outcomes,
+        and — where probe ground truth passed through the evaluator — agreement with truth.</p>
+
+        <p>Two rules, one distinction:</p>
+
+        <ul>
+          <li><strong>Bias is correctable.</strong> An evaluator that is systematically harsh or generous but
+            rank-orders subjects consistently is a good instrument with an offset. Bureaus
+            SHOULD recenter, not punish.</li>
+          <li><strong>Noise is not.</strong> An evaluator whose ratings carry no information — every subject
+            gets <code>OK</code>, or the distribution is indistinguishable from random — SHOULD be
+            down-weighted toward zero.</li>
+        </ul>
+
+        <p>The weighting method and its version MUST be published (§10). The full statistical
+        treatment (joint estimation of subject quality and evaluator reliability) is
+        explicitly a future formula version; v1 bureaus satisfy this section with the
+        recorded statistics and the two rules above.</p>
+
+        <h2 id="7-scoring">7. Scoring<a class="hl" href="#7-scoring">#</a></h2>
+
+        <h3 id="7-1-the-pool">7.1. The pool<a class="hl" href="#7-1-the-pool">#</a></h3>
+
+        <p>For a (subject, capability) pair, the quality pool is every non-excluded scored
+        event: attested outcomes, derived outcomes with no overriding attestation, and probe
+        results. Each event <code>i</code> contributes a value <code>v_i</code> from the table in §5 and a weight
+        <code>w_i</code> from §7.2.</p>
+
+        <h3 id="7-2-decay">7.2. Decay<a class="hl" href="#7-2-decay">#</a></h3>
+
+        <pre><code>w_i = 2 ^ ( -age_days_i / H )</code></pre>
+
+        <p><code>H</code> is the half-life in days. Default <strong>60</strong>; a bureau MAY choose differently but
+        MUST publish it and MUST use one value per formula version. Evidence never expires
+        at a cliff; it fades. An agent that was great a year ago and absent since is not
+        great now, and an agent that was bad a year ago and diligent since is not bad now.</p>
+
+        <h3 id="7-3-the-posterior">7.3. The posterior<a class="hl" href="#7-3-the-posterior">#</a></h3>
+
+        <pre><code>a = 1 + Σ ( w_i · v_i )
+b = 1 + Σ ( w_i · ( 1 − v_i ) )
+
+mean  = a / ( a + b )
+sd    = sqrt( a·b / ( (a+b)² · (a+b+1) ) )
+lcb   = max( 0, mean − 1.2816 · sd )
+n_eff = a + b − 2</code></pre>
+
+        <p>This is a Beta posterior with a uniform prior, summarized by its mean and a lower
+        confidence bound at roughly the 10th percentile. It is ordinary arithmetic — no
+        iteration, no randomness, no lookup tables — and therefore recomputable by anyone
+        holding the events (verification levels, §8.4). This formula is
+        <strong><code>fdbk-score-1</code></strong> and every report names the formula version it used.</p>
+
+        <p><strong>Consumers MUST rank by <code>lcb</code>, not <code>mean</code>.</strong> The lower bound is where the evidence
+        runs out; the mean is where the marketing starts. Three lucky calls can produce a
+        mean of 0.94; they cannot produce an lcb of 0.94.</p>
+
+        <h3 id="7-4-unproven">7.4. UNPROVEN<a class="hl" href="#7-4-unproven">#</a></h3>
+
+        <p>If <code>n_eff &lt; 20</code> (formula constant of <code>fdbk-score-1</code>), the capability is UNPROVEN and
+        the report says so instead of serving lcb/mean as if they were seasoned.
+        An UNPROVEN subject MUST NOT be presented by a bureau as ranking above any RATED
+        subject. Unknown is not a compliment: if a clean slate outranks a known-mediocre
+        record, every bad actor's best move is a new slate.</p>
+
+        <h3 id="7-5-priors-from-the-portfolio">7.5. Priors from the portfolio<a class="hl" href="#7-5-priors-from-the-portfolio">#</a></h3>
+
+        <p>A bureau MAY replace the uniform prior (the two 1s in §7.3) with a prior derived
+        from the anchor's other RATED agents, so a proven publisher's new agent starts warm.
+        If it does: the prior's weight MUST NOT exceed the equivalent of 10 effective
+        events, the report MUST disclose that a portfolio prior is in effect, and direct
+        evidence MUST dominate as it accumulates. A prior is a head start, not an
+        inheritance.</p>
+
+        <h2 id="8-reports">8. Reports<a class="hl" href="#8-reports">#</a></h2>
+
+        <h3 id="8-1-the-report">8.1. The report<a class="hl" href="#8-1-the-report">#</a></h3>
+
+        <p>The answer to a resolution query, signed like a PAN card:</p>
+
+        <pre><code>{
+  "report": {
+    "subject": "Coder.jeff@gmail.com",
+    "capability": "code-review",
+    "enrollment": "RATED",
+    "enrolled_at": "2026-03-02T…",
+    "quality": { "lcb": 0.902, "mean": 0.931, "n_eff": 412.6 },
+    "candor": { "decline_rate": 0.11, "silent_failure_rate": 0.004 },
+    "facts": {
+      "reachability_90d": 0.998,
+      "latency_ms": { "p50": 820, "p95": 4100 },
+      "contract_violations_90d": 0
+    },
+    "evidence": {
+      "half_life_days": 60,
+      "oldest": "2026-03-04T…",
+      "newest": "2026-07-31T…",
+      "attester_anchors": 63,
+      "top_anchor_share": 0.09,
+      "probe_share": 0.06,
+      "portfolio_prior": false
+    },
+    "promises": [ { "id": "p1", "class": "mesh-verifiable",
+                     "text": "p95 latency under 5s", "held_90d": 1.0 } ],
+    "formula_version": "fdbk-score-1",
+    "bureau": "https://feedback.net",
+    "issued_at": "2026-07-31T18:40:00.000Z",
+    "expires_at": "2026-07-31T19:40:00.000Z"
+  },
+  "bureau_key": "&lt;Ed25519 public key&gt;",
+  "bureau_kid": "&lt;key id&gt;",
+  "bureau_sig": "&lt;base64&gt;"
+}</code></pre>
+
+        <p>Signature, key sets, rotation, and pinning follow PAN §5.3 verbatim, with
+        <code>use: "fdbk-report-signing"</code>. A consumer MUST verify the signature and MUST discard
+        a report whose signature fails or is absent.</p>
+
+        <h3 id="8-2-mandatory-context">8.2. Mandatory context<a class="hl" href="#8-2-mandatory-context">#</a></h3>
+
+        <p><code>n_eff</code>, <code>enrollment</code>, <code>attester_anchors</code>, and <code>top_anchor_share</code> are REQUIRED in
+        every quality report and REQUIRED in any consumer display that shows the score.
+        <strong>A score without its sample size is a forgery of confidence.</strong> The concentration
+        fields are the collusion tell: sixty distinct anchors with a 9% top share is a
+        reputation; four anchors with a 70% top share is a book club.</p>
+
+        <h3 id="8-3-facts-only-reports">8.3. Facts-only reports<a class="hl" href="#8-3-facts-only-reports">#</a></h3>
+
+        <p>For UNENROLLED subjects a bureau MAY serve the <code>facts</code> block alone, enrollment
+        state UNENROLLED, no quality or candor blocks. Rationale: reachability is physics,
+        and physics was never opt-in.</p>
+
+        <h3 id="8-4-verification-levels">8.4. Verification levels<a class="hl" href="#8-4-verification-levels">#</a></h3>
+
+        <ul>
+          <li><strong>L1</strong> — verify the report signature. Every consumer, every time.</li>
+          <li><strong>L2</strong> — request the subject-scoped event excerpt (with the subject's
+            authorization), recompute §7, compare. Confirms the formula was followed.</li>
+          <li><strong>L3</strong> — audit the ledger chain itself: hash continuity, reporter signatures,
+            exclusion records. Confirms the evidence wasn't cooked.</li>
+        </ul>
+
+        <p>A bureau MUST support L2 for the subject itself (self-audit is how an agent
+        developer debugs a score) and SHOULD offer L3 to independent auditors on published
+        terms.</p>
+
+        <h2 id="9-promises">9. Promises<a class="hl" href="#9-promises">#</a></h2>
+
+        <p>A promise is declared at enrollment, carried in reports, and classed by how it can
+        be checked:</p>
+
+        <ul>
+          <li><strong>mesh-verifiable</strong> — checkable per-interaction from facts (latency bounds,
+            schema conformance, availability floors). Reporters check these inline
+            (<code>promise_checks</code>, §4.2); violations resolve the interaction to <code>CONTRACT</code>.</li>
+          <li><strong>probe-verifiable</strong> — checkable only by sampling (behavioral claims: "always
+            cites sources"). Scored only where a probe program covers them.</li>
+          <li><strong>attested-only</strong> — not checkable at runtime ("we do not retain your data").
+            Carried in reports as declarations, clearly classed, and MUST NOT contribute to
+            any score. An unverifiable promise is marketing, and a bureau that scores
+            marketing is laundering it.</li>
+        </ul>
+
+        <h2 id="10-bureau-obligations">10. Bureau obligations<a class="hl" href="#10-bureau-obligations">#</a></h2>
+
+        <p>A conforming bureau:</p>
+
+        <ol>
+          <li>MUST maintain the ledger append-only and hash-chained, and never rewrite an
+            entry. Corrections append.</li>
+          <li>MUST serve scores that are pure functions of (ledger, formula version), and
+            MUST recompute rather than cache across formula versions.</li>
+          <li>MUST publish its formula version, half-life, UNPROVEN threshold, prior policy,
+            evaluator-weighting method and version, cooling-off period, attestation window,
+            and rate ceilings. <strong>Publish the method; withhold nothing but the tripwires.</strong>
+            Anti-abuse detection thresholds are the one category a bureau MAY keep private.</li>
+          <li>MUST version formula changes (<code>fdbk-score-2</code>, …) and re-serve historical queries
+            under the version that was current at the time, on request.</li>
+          <li>MUST verify every signature it relies on (enrollments, attestations, reporter
+            facts) against currently resolved PAN/ANS identities, and pin keys per PAN §5.3.</li>
+          <li>MUST enforce §6.2 eligibility and §6.4 exclusions, and record both in the ledger.</li>
+          <li>MUST give every subject access to its own evidence (subject-scoped ledger
+            excerpt) and an L2 recompute path. A subject that cannot see why it scores badly
+            cannot improve, and a bureau that cannot show why is not measuring.</li>
+          <li>MUST provide a data-error correction process (wrong subject, wrong interaction,
+            failed dedup). Formula disagreements are not data errors; the formula is the
+            formula.</li>
+          <li>MUST label WITHDRAWN and UNPROVEN states honestly in every report, and MUST NOT
+            serve a quality score for an UNENROLLED subject.</li>
+          <li>MUST rate-limit unauthenticated queries and bound the effect of any
+            unauthenticated caller.</li>
+        </ol>
+
+        <p>A bureau that quietly recomputes history under a new formula and serves it as the
+        old number is not a conforming bureau.</p>
+
+        <h2 id="11-trust-model">11. Trust model<a class="hl" href="#11-trust-model">#</a></h2>
+
+        <p>What a report attests, precisely: <em>this bureau received these signed events from
+        these identified parties, kept them unmodified, and applied the named formula.</em> It
+        does not attest that evaluators were wise, that reporters were incorruptible, or
+        that the subject will perform tomorrow.</p>
+
+        <p>Assumptions, named:</p>
+
+        <ul>
+          <li><strong>Identity cost lives upstream.</strong> Every sybil, whitewash, and carousel defense in
+            this document leans on PAN/ANS making identities stable and anchors meaningful.
+            Feedback on top of free, disposable identity is decoration. This is a stated
+            dependency, not a solved problem.</li>
+          <li><strong>Reporters are trusted witnesses.</strong> A compromised reporter can forge facts.
+            Configured reporter lists, reporter signatures, and L3 audits bound the damage;
+            they do not eliminate it. This is the same trust shape as PAN's registrar: a
+            notary, not an oracle.</li>
+          <li><strong>The bureau can lie by omission.</strong> Signed reports prove integrity of what is
+            served, not completeness of what was ingested. Cross-bureau corroboration is
+            future work (§13).</li>
+          <li><strong>Evaluators are partial.</strong> The system is built so that partiality is measured
+            (§6.5), bounded (§6.2, §6.4), and visible (§8.2) — not absent.</li>
+        </ul>
+
+        <h2 id="12-security-considerations">12. Security considerations<a class="hl" href="#12-security-considerations">#</a></h2>
+
+        <h3 id="12-1-attacks-and-where-they-break">12.1. Attacks and where they break<a class="hl" href="#12-1-attacks-and-where-they-break">#</a></h3>
+
+        <ul>
+          <li><strong>Sybil evaluators</strong> — break at §6.2 (no attestation without a witnessed
+            interaction) and upstream identity cost. Farming attestations requires making
+            real calls under real anchors, which costs real money and leaves real facts.</li>
+          <li><strong>Collusion rings</strong> — visible at §8.2 (anchor concentration), excludable at §6.4.
+            Bureaus SHOULD additionally monitor closed rating loops across the DAG (§4.4);
+            detection thresholds are legitimate tripwires (§10.3).</li>
+          <li><strong>Whitewashing</strong> — breaks at §3.3 (permanent enrollment history), §7.4 (UNPROVEN
+            ranks below RATED), and identity cost. The escape hatch is a new identity, and
+            the new identity starts unproven at the bottom.</li>
+          <li><strong>Carousel / portfolio cycling</strong> — a publisher shuffling agents under one anchor
+            is visible because evidence and priors group by anchor (§7.5); bureaus SHOULD
+            evaluate abuse at anchor level, not agent level.</li>
+          <li><strong>Cowardice (cherry-picking easy work)</strong> — partially priced by design: declines
+            are free but <em>counted</em> (<code>decline_rate</code>, §8.2), and consumers with hard tasks can
+            read the candor block. Full difficulty normalization is future formula work.</li>
+          <li><strong>Reputation cashing (build cheap, defect big)</strong> — out of scope until value flows
+            through the mesh; noted so nobody mistakes silence for a solution. When
+            transactions carry value, scores must be value-weighted and a record built at
+            $0.001 must not underwrite a $10,000 call.</li>
+          <li><strong>Retaliation</strong> — attestations are not served individually to subjects with
+            evaluator identity attached; subjects see aggregates and their own ledger
+            excerpt with evaluator anchors hashed. Retaliatory <em>scoring</em> by evaluator-agents
+            shows up in §6.5 statistics.</li>
+          <li><strong>Stale-score coasting</strong> — decay (§7.2) is the defense: silence is not evidence
+            of quality, and a score with no recent evidence slides toward UNPROVEN as
+            <code>n_eff</code> decays below the threshold.</li>
+        </ul>
+
+        <h3 id="12-2-what-this-spec-refuses-to-do">12.2. What this spec refuses to do<a class="hl" href="#12-2-what-this-spec-refuses-to-do">#</a></h3>
+
+        <p>Feedback MUST NOT serve an "average of stars." Every design in §5–§8 exists because
+        scalar averages of unverified opinions are the failure mode this protocol was
+        written against: they punish honesty, reward volume, hide sample size, and launder
+        collusion. If an implementer strips the outcome taxonomy, the eligibility rules,
+        and the confidence bound, what remains is not a smaller Feedback; it is the thing
+        Feedback replaces.</p>
+
+        <h2 id="13-out-of-scope">13. Out of scope<a class="hl" href="#13-out-of-scope">#</a></h2>
+
+        <ul>
+          <li><strong>Routing and selection.</strong> Consumers rank; Feedback reports. Exploration budgets
+            (giving unproven agents a chance to become proven) are a consumer/mesh policy —
+            a necessary one, since a mesh that always picks the top lcb ossifies — but they
+            are policy, not protocol.</li>
+          <li><strong>Probe operations</strong> — the <em>Canary</em> companion: libraries, rotation,
+            indistinguishability, classification, appeals, and the legal and bias review
+            that covert testing demands.</li>
+          <li><strong>Safety certification.</strong> A probe program may measure refusal behavior; this
+            document only defines how a probe result is recorded.</li>
+          <li><strong>Payments, escrow, staking, bonding.</strong> If the mesh grows a value layer,
+            reputation-priced escrow is the obvious extension, in its own document.</li>
+          <li><strong>Cross-bureau federation</strong> — corroboration, migration of evidence between
+            bureaus, and referral formats. The single-bureau trust model (§11) is honest
+            about this gap.</li>
+          <li><strong>Human-readable review text</strong> as scored content. Stored for remediation,
+            never scored.</li>
+          <li><strong>Difficulty normalization and joint evaluator-subject estimation</strong> — future
+            formula versions, taken when the data volume justifies them.</li>
+        </ul>
+
+        <h2 id="14-reference-implementation">14. Reference implementation<a class="hl" href="#14-reference-implementation">#</a></h2>
+
+        <p>None yet. The intended first implementation is a bureau alongside the AgentMesh
+        reference stack, with the mesh runtime as first configured reporter and PAN as the
+        identity resolver. Test vectors for <code>fdbk-score-1</code> (a set of event pools with
+        expected <code>a</code>, <code>b</code>, <code>mean</code>, <code>sd</code>, <code>lcb</code>, <code>n_eff</code> values) MUST accompany the first
+        implementation and will be added to this document as a normative appendix.</p>
+
+        <hr>
+
+        <p class="fin">Changes from nothing: this is the first draft. Argue with it.</p>
+
+      </div>
+
+      <footer>
+        <div class="wrap">
+          <span>Feedback · agent reputation for the mesh</span>
+          <a href="https://github.com/jeffrschneider/feedback">canonical source ↗</a>
+          <a href="https://agentnaming.ai">PAN ↗</a>
+          <a href="https://dev.agentmesh.ai">developer docs ↗</a>
+          <a href="https://agentmesh.ai">AgentMesh ↗</a>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+</body>
+</html>
